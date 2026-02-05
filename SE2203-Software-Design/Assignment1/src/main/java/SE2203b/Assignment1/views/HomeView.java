@@ -1,12 +1,15 @@
 package SE2203b.Assignment1.views;
 
 import SE2203b.Assignment1.Domain.Assessment;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -16,7 +19,7 @@ import com.vaadin.flow.router.Route;
 @Route("")
 public class HomeView extends VerticalLayout {
     // Navigation buttons for switching between UI sections
-    private Button home, profile, help;
+    private Button planner, summary, help;
 
     // Top menu bar containing the navigation buttons
     private HorizontalLayout menu;
@@ -28,9 +31,27 @@ public class HomeView extends VerticalLayout {
     // Content area where the current screen gets placed
     private HorizontalLayout content;
 
+    //layouts for the 2 pages and the help popup
+    HorizontalLayout plannerLayout;
+    VerticalLayout summaryLayout;
+    Dialog helpDialog;
+
     public HomeView() {
         init();
 
+        planner.addClickListener(e -> {
+            reset("Planner");
+            content.add(plannerLayout);
+        });
+
+        summary.addClickListener(e -> {
+            reset("Summary");
+            content.add(summaryLayout);
+        });
+
+        help.addClickListener(e -> {
+            helpDialog.open();
+        });
     }
 
     /**
@@ -49,28 +70,30 @@ public class HomeView extends VerticalLayout {
      */
     private void init(){
         // Navigation buttons for switching between sections
-        home = new Button("Planner");
-        profile = new Button("Summary");
+        planner = new Button("Planner");
+        summary = new Button("Summary");
         help = new Button("Help");
 
         // Top menu bar containing the navigation buttons
-        menu = new HorizontalLayout(home, profile, help);
+        menu = new HorizontalLayout(planner, summary, help);
 
         // Page title and current section indicator
-        title = new H1("Profile");
-        currentSection = new NativeLabel("Current section: Profile");
+        currentSection = new NativeLabel("Current section: Planner");
+        title = new H1("Planner");
 
         //main content container that will hold the active screen (Planner, Summary, or help)
         content = new HorizontalLayout();
         content.setWidthFull();
 
         //add base UI elements to the page
-        add(menu, title, currentSection, content);
+        add(menu, currentSection, title, content);
 
         //build each UI page
         initPlanner();
         initSummary();
         initHelp();
+
+        content.add(plannerLayout);
     }
 
     /**
@@ -93,10 +116,20 @@ public class HomeView extends VerticalLayout {
 
         //mark is disabled by default, and only enabled when marked is checked
         mark.setEnabled(false);
+
         //dropdown options for assessment category
         type.setItems("Lab", "Quiz", "Assignment", "Midterm", "Final", "Project", "Other");
+
+        //buttons to make the form usable
+        Button save = new Button("Save"),
+                clear = new Button("Clear"),
+                delete = new Button("Delete");
+
+        //place the buttons side by side
+        HorizontalLayout buttons = new HorizontalLayout(save, clear, delete);
+
         //arrange form fields vertically
-        VerticalLayout form = new VerticalLayout(name, type, weight, marked, mark);
+        VerticalLayout form = new VerticalLayout(name, type, weight, marked, mark, buttons);
         form.setWidth("360px");
 
         //grid to display assessment objects
@@ -110,24 +143,54 @@ public class HomeView extends VerticalLayout {
         display.setWidthFull();
 
         //puts the form on the left and the grid of assessments on the right
-        HorizontalLayout plannerLayout = new HorizontalLayout(form, display);
+        plannerLayout = new HorizontalLayout(form, display);
         plannerLayout.setWidthFull();
-
-        //adds this screen to the content area
-        content.add(plannerLayout);
     }
 
     /**
      * initSummary: Creates the Summary screen UI, this is where grade totals and required averages are shown
      */
     private void initSummary(){
+        NativeLabel total = new NativeLabel("Total marked weight: 0.0%"),
+                weightedGrade = new NativeLabel("Weighted grade so far (marked only): 0.0%"),
+                remainingWeight = new NativeLabel("Remaining weight to reach 100%%: 0.0%"),
+                requiredAverageLabel = new NativeLabel("Required average on remaining: 0.0%");
 
+        NumberField target = new NumberField("Target overall (%)");
+
+        //arranges summary elements vertically
+        summaryLayout = new VerticalLayout(total, weightedGrade, remainingWeight, target, requiredAverageLabel);
+        summaryLayout.setWidthFull();
     }
 
     /**
      * initHelp: Creates the Help screen UI, explains how to use the grade calculator
      */
-    private void initHelp(){
+    private void initHelp() {
+        helpDialog = new Dialog();
+        // Adding a simple help dialog that has a label and a close button
+        NativeLabel helpLabel = new NativeLabel("Help"),
+                dialogPlanner = new NativeLabel("Planner: add assessments with weights and marks."),
+                dialogSummary = new NativeLabel("Summary: see totals and required average for a target grade."),
+                dialogRules = new NativeLabel("Rules: total planned weight cannot exceed 100%; names must be unique");
 
+        helpLabel.getStyle().set("font-weight", "bold");
+
+        Button dialogClose = new Button("Close", e -> {
+            // close the dialog
+            helpDialog.close();
+        });
+        HorizontalLayout buttonBar = new HorizontalLayout(JustifyContentMode.END, dialogClose);
+        buttonBar.setWidthFull();
+
+        VerticalLayout dialogLayout = new VerticalLayout();
+        dialogLayout.add(helpLabel, dialogPlanner, dialogSummary, dialogRules, buttonBar);
+
+        // Prevent users from closing the dialog by clicking outside or pressing Escape
+        helpDialog.setCloseOnEsc(false);
+        helpDialog.setCloseOnOutsideClick(false);
+        // Block all background interaction
+        helpDialog.setModality(ModalityMode.STRICT);
+        helpDialog.add(dialogLayout);
     }
 }

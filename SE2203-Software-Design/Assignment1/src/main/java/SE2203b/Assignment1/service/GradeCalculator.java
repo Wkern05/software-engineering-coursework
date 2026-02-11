@@ -5,55 +5,61 @@ import SE2203b.Assignment1.Domain.Assessment;
 import java.util.List;
 
 public class GradeCalculator {
-    private double totalWeight; //total weight of graded assignments
-    private double weightedGrade; // total grade (mark * weight) for all graded assignments
+    /**
+        GradeCalculator provides static helper methods for computing grade
+        summaries from a list of Assessment objects.
+
+        Assessments only contribute if it is marked and not null
+     */
 
     /**
-     * totalMarkedWeight: Computes the total weight of all marked assessments
+     * totalMarkedWeight: Sums the weights of all marked, non-null assessments
      *
-     * @param list the list of assessments to analyze
+     * @param list the List of assessments to evaluate
      * @return the total weight of marked assessments
      */
-    public double totalMarkedWeight(List<Assessment> list){
-        totalWeight = 0;
+    public static double totalMarkedWeight(List<Assessment> list){
+        double totalWeight = 0.0;
         for(Assessment a : list)
-            if(a.getMarked())
+            if(a.getMarked() && a.getMark() != null)
                 totalWeight += a.getWeight();
-
         return totalWeight;
     }
 
     /**
-     * weightedGradeSoFar: Computes the weighted grade so far using only marked assessments
+     * weightedGradeSoFar: Computes the current weighted grade contribution using only marked assessments.
+     * The output is out of 1, not 100
      *
-     * @param list the list of assessments to analyze
-     * @return the sum of (mark * weight) for all marked assessments
+     * @param list the List of assessments to evaluate
+     * @return the sum of (mark * weight)/100 for all marked assessments
      */
-    public double weightedGradeSoFar(List<Assessment> list) {
-        weightedGrade = 0;
+    public static double weightedGrade(List<Assessment> list) {
+        double weightedGrade = 0.0;
         for(Assessment a : list)
-            if(a.getMarked())
+            if(a.getMarked() && a.getMark() != null)
                 weightedGrade += a.getMark() * a.getWeight();
-
-        return weightedGrade;
+        return weightedGrade/100;
     }
 
     /**
-     * remainingWeight: computes how much weight is still ungraded (assumes totalMarkedWeight has already been called)
+     * remainingWeight: computes remaining ungraded weight out of 100
      *
+     * @param list the List of assessments to evaluate
      * @return the remaining weight out of 100
      */
-    public double remainingWeight(){
-        return 100 - totalWeight;
+    public static double remainingWeight(List<Assessment> list){
+        return 100 - totalMarkedWeight(list);
     }
 
     /**
      * requiredAverage: Computes what average mark is required on remaining assessments to reach a target
+     * The output is out of 100
      *
      * @param target desired final grade percentage
+     * @param list the List of assessments to evaluate
      * @return required average on remaining assessments
      */
-    public double requiredAverage(double target){
-        return (target-weightedGrade)/remainingWeight()*100;
+    public static Double requiredAverage(double target, List<Assessment> list){
+        return (target- weightedGrade(list))/remainingWeight(list)*100;
     }
 }

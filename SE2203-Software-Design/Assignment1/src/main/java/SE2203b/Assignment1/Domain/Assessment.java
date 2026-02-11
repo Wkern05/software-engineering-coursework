@@ -3,11 +3,12 @@ package SE2203b.Assignment1.Domain;
 public class Assessment {
     //Stores the basic information for a graded course item
     private String name, type;
-    private double weight, mark;
+    private double weight;
+    private Double mark;//Double instead of double so that it is nullable
     private boolean marked;
 
     /**
-     * Assessment: Constructs an assessment object
+     * Assessment: Constructs an assessment object, not currently used but may be in a future version
      *
      * @param name name of the assessment
      * @param type type of the assessment (e.g. midterm, lab, quiz)
@@ -15,13 +16,18 @@ public class Assessment {
      * @param marked whether or not the assessment has been graded yet
      * @param mark grade received, only considered if marked == true
      */
-    public Assessment(String name, String type, double weight, boolean marked, double mark){
+    public Assessment(String name, String type, double weight, boolean marked, Double mark){
         this.name = name;
         this.type = type;
         this.weight = weight;
         this.marked = marked;
         this.mark = mark;
     }
+
+    /**
+     * no arg constructor
+     */
+    public Assessment(){}
 
     /**
      * getters and setters for all parameters, no special conditions for any of them
@@ -39,7 +45,7 @@ public class Assessment {
     public boolean getMarked(){return marked;}
     public void setMarked(boolean marked){this.marked = marked;}
 
-    public double getMark(){return mark;}
-    public void setMark(double mark){this.mark = mark;}
+    public Double getMark(){return mark;}
+    public void setMark(Double mark){this.mark = mark;}
 
 }
